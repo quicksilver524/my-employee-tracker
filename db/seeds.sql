@@ -11,7 +11,7 @@ VALUES
 ('Seahorse Manager', 1000000, 1),
 ('Top Manager', 40000, 2),
 ('Bottom Manager', 35000, 3),
-('Reciver', 23000, 4),
+('Receiver', 23000, 4),
 ('Switch Manager', 58000, 5); 
 
 INSERT INTO employee(first_name, last_name, roles_id, manager_id)

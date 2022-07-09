@@ -16,11 +16,12 @@ function start() {
         message: "Select an Option.",
         choices: [
           "View All Employees",
-          "View Roles",
+          "View All Roles",
           "View Departments",
           "Add Employee",
           "Add Role",
           "Add Department",
+          "Update an Employee Role",
           "Quit",
         ],
       },
@@ -45,8 +46,11 @@ function start() {
         case "Add Department":
           addDepartment();
           break;
+        case "Update an Employee Role":
+          UpdateEmployeeRoles();
+          break;
         case "Quit":
-          quit();
+          return Quit();
           break;
       }
     });
@@ -72,7 +76,7 @@ function viewAllEmployees() {
             start();
             break;
           case "Quit":
-            quit();
+            return Quit();
             break;
         }
       });
@@ -99,7 +103,7 @@ function viewRoles() {
             start();
             break;
           case "Quit":
-            quit();
+            return Quit();
             break;
         }
       });
@@ -126,7 +130,7 @@ function viewDepartments() {
             start();
             break;
           case "Quit":
-            quit();
+            return Quit();
             break;
         }
       });
@@ -145,7 +149,7 @@ function addDepartment() {
       db.query("INSERT INTO department(department_name) VALUES (?)", [
         response.department_name,
       ]),
-        function (err, response) {
+        (err, response) => {
           if (err) throw err;
           inquirer
             .prompt([
@@ -162,7 +166,7 @@ function addDepartment() {
                   start();
                   break;
                 case "Quit":
-                  Quit();
+                  return Quit();
               }
             });
         };
@@ -192,7 +196,7 @@ function addRoles() {
         "INSERT INTO roles(title, salary, department_id) VALUES (?,?,?)",
         [response.title, response.salary, response.department_id]
       ),
-        function (err, response) {
+        (err, response) => {
           if (err) throw err;
           inquirer
             .prompt([
@@ -209,7 +213,7 @@ function addRoles() {
                   start();
                   break;
                 case "Quit":
-                  Quit();
+                  return Quit();
               }
             });
         };
@@ -248,8 +252,7 @@ function addEmployee() {
           response.last_name,
           response.roles_id,
           response.manager_id,
-        ]
-      ),
+        ],
         (err, response) => {
           if (err) throw err;
           inquirer
@@ -267,12 +270,97 @@ function addEmployee() {
                   start();
                   break;
                 case "Quit":
-                  Quit();
+                  return Quit();
               }
             });
-        };
+        }
+      );
     });
 }
+function UpdateEmployeeRoles() {
+  console.log("Updating Employee Roles");
+  const employeeNames = [];
+  const employeeRoles = [];
+  const roleQuery = "SELECT * FROM roles";
+  const employeeID = [];
+  const employeeRoleID = [];
+  const employeeQuery = "SELECT * FROM employee";
+
+  db.query(employeeQuery, function (err, res) {
+    if (err) throw err;
+    res.forEach((employee) => {
+      employeeNames.push(employee.first_name + " " + employee.last_name);
+      employeeID.push(employee.id);
+    });
+    console.log(employeeNames, employeeID);
+  });
+
+  db.query(roleQuery, function (err, res) {
+    if (err) throw err;
+    res.forEach((role) => {
+      employeeRoles.push(role.title);
+      employeeRoleID.push(role.id);
+    });
+    console.log(employeeRoles, employeeRoleID);
+  });
+
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "employeeName",
+        message: "Select an employee to update their role.",
+        choices: employeeNames,
+      },
+      {
+        type: "list",
+        name: "roles",
+        message: "Select the role you want to assign to the employee.",
+        choices: employeeRoles,
+      },
+    ])
+    .then(function (response) {
+      const employeeIndex = employeeNames.indexOf(response.employeeName);
+      const roleIndex = employeeRoles.indexOf(response.roles);
+      const employeeid = employeeID[employeeIndex];
+      const roleID = employeeRoleID[roleIndex];
+
+      db.query(
+        `UPDATE employee SET roles_id = ? WHERE employee_id = ?`,
+        [employeeid, roleID],
+        (err, response) => {
+          if (err) throw err;
+          console.log(
+            "Updated " +
+              data.employee_name +
+              " to role " +
+              data.role_title +
+              " in the database"
+          );
+
+          inquirer
+            .prompt([
+              {
+                type: "list",
+                name: "choice",
+                message: "select an option.",
+                choices: ["Main Menu", "Quit"],
+              },
+            ])
+            .then((answer) => {
+              switch (answer.choice) {
+                case "Main Menu":
+                  start();
+                  break;
+                case "Quit":
+                  return Quit();
+              }
+            });
+        }
+      );
+    });
+}
+
 function Quit() {
   console.log("Goodbye!");
   process.exit();
