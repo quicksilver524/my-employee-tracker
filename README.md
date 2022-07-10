@@ -27,4 +27,4 @@
 ![Picture 5](./images/ss5.png)
 
 # Quit:
-![Picture 6](./images/ss6png)
+![Picture 6](./images/ss6.png)
