@@ -31,8 +31,8 @@ function start() {
         case "View All Employees":
           viewAllEmployees();
           break;
-        case "View Roles":
-          viewRoles();
+        case "View All Roles":
+          viewAllRoles();
           break;
         case "View Departments":
           viewDepartments();
@@ -82,7 +82,7 @@ function viewAllEmployees() {
       });
   });
 }
-function viewRoles() {
+function viewAllRoles() {
   let request = "SELECT * FROM roles";
   db.query(request, function (err, res) {
     if (err) throw err;
@@ -146,9 +146,9 @@ function addDepartment() {
       },
     ])
     .then(function (response) {
-      db.query("INSERT INTO department(department_name) VALUES (?)", [
-        response.department_name,
-      ]),
+      db.query(
+        "INSERT INTO department(department_name) VALUES (?)",
+        [response.department_name],
         (err, response) => {
           if (err) throw err;
           inquirer
@@ -169,7 +169,8 @@ function addDepartment() {
                   return Quit();
               }
             });
-        };
+        }
+      );
     });
 }
 function addRoles() {
@@ -194,8 +195,7 @@ function addRoles() {
     .then(function (response) {
       db.query(
         "INSERT INTO roles(title, salary, department_id) VALUES (?,?,?)",
-        [response.title, response.salary, response.department_id]
-      ),
+        [response.title, response.salary, response.department_id],
         (err, response) => {
           if (err) throw err;
           inquirer
@@ -216,7 +216,8 @@ function addRoles() {
                   return Quit();
               }
             });
-        };
+        }
+      );
     });
 }
 function addEmployee() {
@@ -278,13 +279,12 @@ function addEmployee() {
     });
 }
 function UpdateEmployeeRoles() {
-  console.log("Updating Employee Roles");
-  const employeeNames = [];
-  const employeeRoles = [];
-  const roleQuery = "SELECT * FROM roles";
-  const employeeID = [];
-  const employeeRoleID = [];
-  const employeeQuery = "SELECT * FROM employee";
+  let employeeID = [];
+  let employeeRoleID = [];
+  let employeeQuery = "SELECT * FROM employee";
+  let employeeNames = [];
+  let employeeRoles = [];
+  let roleQuery = "SELECT * FROM roles";
 
   db.query(employeeQuery, function (err, res) {
     if (err) throw err;
@@ -293,72 +293,65 @@ function UpdateEmployeeRoles() {
       employeeID.push(employee.id);
     });
     console.log(employeeNames, employeeID);
-  });
 
-  db.query(roleQuery, function (err, res) {
-    if (err) throw err;
-    res.forEach((role) => {
-      employeeRoles.push(role.title);
-      employeeRoleID.push(role.id);
-    });
-    console.log(employeeRoles, employeeRoleID);
-  });
+    db.query(roleQuery, function (err, res) {
+      if (err) throw err;
+      res.forEach((roles) => {
+        employeeRoles.push(roles.title);
+        employeeRoleID.push(roles.id);
+      });
+      console.log(employeeRoles, employeeRoleID);
 
-  inquirer
-    .prompt([
-      {
-        type: "list",
-        name: "employeeName",
-        message: "Select an employee to update their role.",
-        choices: employeeNames,
-      },
-      {
-        type: "list",
-        name: "roles",
-        message: "Select the role you want to assign to the employee.",
-        choices: employeeRoles,
-      },
-    ])
-    .then(function (response) {
-      const employeeIndex = employeeNames.indexOf(response.employeeName);
-      const roleIndex = employeeRoles.indexOf(response.roles);
-      const employeeid = employeeID[employeeIndex];
-      const roleID = employeeRoleID[roleIndex];
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "employeeName",
+            message: "Select an employee to update their role.",
+            choices: employeeNames,
+          },
+          {
+            type: "list",
+            name: "roles",
+            message: "Select the role you want to assign to the employee.",
+            choices: employeeRoles,
+          },
+        ])
+        .then(function (response) {
+          let employeeIndex = employeeNames.indexOf(response.employeeName);
+          let roleIndex = employeeRoles.indexOf(response.roles);
+          let employeeid = employeeID[employeeIndex];
+          let roleID = employeeRoleID[roleIndex];
 
-      db.query(
-        `UPDATE employee SET roles_id = ? WHERE employee_id = ?`,
-        [employeeid, roleID],
-        (err, response) => {
-          if (err) throw err;
-          console.log(
-            "Updated " +
-              data.employee_name +
-              " to role " +
-              data.role_title +
-              " in the database"
+          db.query(
+            `UPDATE employee SET roles_id = ? WHERE id = ?`,
+            [roleID, employeeid],
+            (err, data) => {
+              if (err) throw err;
+              console.log("Updated in the database");
+              inquirer
+                .prompt([
+                  {
+                    type: "list",
+                    name: "choice",
+                    message: "select an option.",
+                    choices: ["Main Menu", "Quit"],
+                  },
+                ])
+                .then((answer) => {
+                  switch (answer.choice) {
+                    case "Main Menu":
+                      start();
+                      break;
+                    case "Quit":
+                      return Quit();
+                  }
+                });
+            }
           );
-
-          inquirer
-            .prompt([
-              {
-                type: "list",
-                name: "choice",
-                message: "select an option.",
-                choices: ["Main Menu", "Quit"],
-              },
-            ])
-            .then((answer) => {
-              switch (answer.choice) {
-                case "Main Menu":
-                  start();
-                  break;
-                case "Quit":
-                  return Quit();
-              }
-            });
-        }
-      );
+        });
     });
+  });
 }
 
 function Quit() {
