@@ -12,19 +12,19 @@
 
 
 # Open New terminal within VS code or cmdline and type *npm start*: 
-![Picture 1](./images/ss-1.png)
+![Picture 1](./images/ss1.png)
 
 # Select your option:
-![Picture 2](./images/ss-2.png)
+![Picture 2](./images/ss2.png)
 
 # View option employee/role/department:
-![Picture 3](./images/ss-3.png)
+![Picture 3](./images/ss3.png)
 
 # Add new employee/role/department:
-![Picture 4](./images/ss-4.png)
+![Picture 4](./images/ss4.png)
 
 # Update Employee Role:
-![Picture 5](./images/ss-5.png)
+![Picture 5](./images/ss5.png)
 
 # Quit:
-![Picture 6(./images/ss-6png)
+![Picture 6](./images/ss6png)
